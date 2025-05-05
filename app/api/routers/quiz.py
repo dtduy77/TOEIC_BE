@@ -38,8 +38,15 @@ def generate(
         
         # Get user's vocabulary
         vocab = crud_vocab.list_for_user(db, current.id)
+        
+        # Check if user has enough vocabulary for the requested quiz
         if len(vocab) < 4:
             raise HTTPException(400, "Need at least 4 words in your vocabulary to generate a quiz")
+        
+        # Check if user has enough vocabulary for the requested number of questions
+        # We need at least num_questions + 3 words (for distractors)
+        if len(vocab) < num_questions:
+            raise HTTPException(400, f"Not enough vocabulary words. You have {len(vocab)} words but need at least {num_questions} for this quiz type.")
 
         # Select random vocabulary items for the quiz
         chosen = sample(vocab, min(num_questions, len(vocab)))
